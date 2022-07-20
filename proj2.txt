@@ -1,0 +1,165 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+
+char iContent(char* cmd,char* textS){
+    char tmp[1000];
+for(int k=0; cmd[k]!=NULL; k++)
+            {
+                tmp[k]=cmd[k+1];
+                //printf("%c",cmd);
+            }
+            strcat(tmp,textS);
+            strcpy(textS,tmp);
+            //printf("%s",textS);
+            return *textS;
+}
+
+char delete(char* textS){
+            strcpy(textS,"\0");
+            return *textS;
+}
+
+char removeEOL(char* textS){
+for(int i=0; textS[i]!=NULL; i++)
+            {
+                 if ( textS[i] == '\n' || textS[i] == '\r' )
+                textS[i] = '\0';
+        }
+            return *textS;
+}
+
+char aContent(char* cmd,char* textS){
+    char tmp[1000];
+for(int i=0; textS[i]!=NULL; i++)
+            {
+                 if ( textS[i] == '\n' || textS[i] == '\r' )
+                textS[i] = '\0';
+        }
+for(int i=0; cmd[i]!=NULL; i++)
+            {
+                 tmp[i]=cmd[i+1];
+        }
+        strcat(textS,tmp);
+
+            //strcpy(textS,cmd);
+            //printf("%s",textS);
+            return *textS;
+}
+
+char bContent(char* cmd,char* textS){
+    char tmp[1000];
+for(int k=0; cmd[k]!=NULL; k++)
+            {
+                tmp[k]=cmd[k+1];
+                if ( tmp[k] == '\n' || tmp[k] == '\r' )
+                tmp[k] = '\0';
+            }
+            strcat(tmp,textS);
+            strcpy(textS,tmp);
+            //printf("%s",textS);
+            return *textS;
+}
+
+
+long int gotoX(char* cmd){
+    long int x;
+for(int k=0; cmd[k]!=NULL; k++)
+            {
+                cmd[k]=cmd[k+1];
+                if ( cmd[k] == '\n' || cmd[k] == '\r' )
+                cmd[k] = '\0';
+            }
+                x = strtol(cmd,NULL,10);
+
+            return x;
+}
+
+long int nextX(char* cmd){
+    long int x;
+for(int k=0; cmd[k]!=NULL; k++)
+            {
+                cmd[k]=cmd[k+1];
+                if ( cmd[k] == '\n' || cmd[k] == '\r' )
+                cmd[k] = '\0';
+            }
+                x = strtol(cmd,NULL,10);
+
+            return x;
+}
+
+
+int main()
+{
+
+    long int y;
+    long len=1001;
+    long wid=100;
+    //int c=0;
+    char cmd[wid][len];
+    //char tmp[100][len];
+    char textS[len];
+    FILE *prikazy,*text;
+    prikazy = fopen("log.txt", "rw");
+    text = fopen("text.txt", "rw");
+    for(int i=0; fgets(cmd[i], len, prikazy)!=NULL; i++){//  printf("%s",cmd[i]);
+    }
+    fgets(textS, len, text);
+
+    for(long int j=0; cmd[j][0]!=NULL; j++)
+    {
+        switch(cmd[j][0])
+        {
+        case 'i' :
+            iContent(cmd[j],textS);
+
+            break;
+        case 'b' :
+           bContent(cmd[j],textS);
+            break;
+        case 'a' :
+           aContent(cmd[j],textS);
+            break;
+        case 'r' :
+           removeEOL(textS);
+            break;
+        case 'd' :
+            if(strlen(cmd[j])>2){
+            for(int l=1;nextX(cmd[j])<l;l++){
+            delete(textS);}}
+            else{
+            delete(textS);
+            }
+            //fgets(textS, 1001, text);
+            break;
+        case 'n' :
+            if(strlen(cmd[j])>2)
+                for(int l=1;nextX(cmd[j])<l;l++)
+                fgets(textS, 1001, text);
+
+
+            printf("%s",textS);
+            fgets(textS, 1001, text);
+            break;
+        case 'q' :
+            return 0;
+            break;
+        case 'g' :  //dorobit Max interval podla poctu prikazov
+            if(strlen(cmd[j])>2)
+               j=(gotoX(cmd[j])-1);
+            break;
+
+        }
+
+        }
+
+    fclose(prikazy);
+    fclose(text);
+    return 0;
+}
+
+

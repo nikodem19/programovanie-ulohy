@@ -1,0 +1,230 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char sConRepl(char* cmd,char* textS)
+{
+    char con[15]= {};
+    char rep[15]= {};
+    char oddelovac=cmd[1];
+    char tmp[1000];
+    for(int i=0; cmd[i]!='\0'; i++)
+    {
+        tmp[i]=cmd[i+2];
+        if ( tmp[i] == '\n' || tmp[i] == '\r' )
+            tmp[i] = '\0';
+    }
+    for(int i=0; tmp[i]!='\0'; i++)
+    {
+        if(tmp[i]==oddelovac)
+            break;
+        con[i]=tmp[i];
+    }
+    while(tmp[0]!=oddelovac)
+    {
+        for(int i=0; tmp[i]!='\0'; i++)
+        {
+            tmp[i]=tmp[i+1];
+        }
+    }
+    for(int i=0; tmp[i]!='\0'; i++)
+    {
+        tmp[i]=tmp[i+1];
+    }
+    strcpy(rep,tmp);
+    char *pos = strstr(textS, con);
+    size_t novaDlzka = strlen(textS) - strlen(con) + strlen(rep);
+    char novyText[novaDlzka +1];
+    memcpy(novyText, textS, pos - textS); //skopíruje èas stringu pred nahradenim
+    memcpy(novyText + (pos - textS), rep, strlen(rep)); // nakopíruje rep
+    strcpy(novyText + (pos - textS) + strlen(rep), pos + strlen(con)); // skopíruje zvysok
+    strcpy(textS,novyText);
+    return *textS;
+}
+
+char iContent(char* cmd,char* textS)
+{
+    char tmp[1000];
+    for(int k=0; cmd[k]!='\0'; k++)
+    {
+        tmp[k]=cmd[k+1];
+    }
+    strcat(tmp,textS);
+    strcpy(textS,tmp);
+    return *textS;
+}
+
+char delete(char* textS)
+{
+    strcpy(textS,"\0");
+    return *textS;
+}
+
+char removeEOL(char* textS)
+{
+    for(int i=0; textS[i]!='\0'; i++)
+    {
+        if ( textS[i] == '\n' || textS[i] == '\r' )
+            textS[i] = '\0';
+    }
+    return *textS;
+}
+
+char aContent(char* cmd,char* textS)
+{
+    char tmp[1000];
+    for(int i=0; textS[i]!='\0'; i++)
+    {
+        if ( textS[i] == '\n' || textS[i] == '\r' )
+            textS[i] = '\0';
+    }
+    for(int i=0; cmd[i]!='\0'; i++)
+    {
+        tmp[i]=cmd[i+1];
+    }
+    strcat(textS,tmp);
+    return *textS;
+}
+
+char bContent(char* cmd,char* textS)
+{
+    char tmp[100];
+    for(int k=0; cmd[k]!='\0'; k++)
+    {
+        tmp[k]=cmd[k+1];
+        if ( tmp[k] == '\n' || tmp[k] == '\r' )
+            tmp[k] = '\0';
+    }
+    strcat(tmp,textS);
+    strcpy(textS,tmp);
+    return *textS;
+}
+
+
+long int numFromS(char* cmd)
+{
+    char tmp[100];
+    long int x;
+    for(int k=0; cmd[k]!='\0'; k++)
+    {
+        tmp[k]=cmd[k+1];
+        if ( tmp[k] == '\n' || tmp[k] == '\r' )
+            tmp[k] = '\0';
+    }
+    x = strtol(tmp,NULL,10);
+    return x;
+}
+
+
+int main(int argc, char *argv[])
+{
+    if(argc==2)
+    {
+        char before[100],after[100]= {};
+
+        int max=0;
+        long int z;
+        long len=1001;
+        long columns=100;
+        long rows=101;
+        char cmd[rows][columns];
+        char textS[len];
+        FILE *prikazy,*text;
+        prikazy = fopen(argv[1], "r");// z argv1
+        text = fopen("text.txt", "rw"); //vymazat
+        for(int i=0; fgets(cmd[i], len, prikazy)!='\0'; i++) {}
+        fgets(textS, len, text);//stdin
+        for(long int j=0; cmd[j][0]!='\0'; j++)
+        {
+            switch(cmd[j][0])
+            {
+            case 'i' :
+                iContent(cmd[j],textS);
+                break;
+            case 'b' :
+                bContent(cmd[j],textS);
+                break;
+            case 'a' :
+                aContent(cmd[j],textS);
+                break;
+            case 'r' :
+                removeEOL(textS);
+                break;
+            case 'd' :
+                if(strlen(cmd[j])>2)
+                {
+                    for(int l=1; numFromS(cmd[j])<l; l++)
+                    {
+                        delete(textS);
+                    }
+                }
+                else
+                {
+                    delete(textS);
+                }
+                break;
+            case 'n' :
+                z=numFromS(cmd[j]);
+                if(z==0)
+                    z=1;
+                int xy=1;
+                while(xy<=z)
+                {
+                    fprintf(stdout, "%s", textS);
+                    if(fgets(textS, 1001, text)!='\0') {}
+                    else
+                    {
+                        fclose(prikazy);
+                        return 0;
+                    }
+                    xy++;
+                }
+                break;
+            case 'q' :
+                fclose(prikazy);
+                return 0;
+                break;
+            case 's' :
+                sConRepl(cmd[j],textS);
+                break;
+            case 'S' :
+                while(strcmp(before,after)!=0)
+                {
+                    *before=textS;
+                    *after=sConRepl(cmd[j],textS);
+                    printf("%s",textS);
+                    if(strcmp(before,after)==0)
+                        break;
+                }/*
+                for(int num=0;strcmp(before,after)!=0;num++){
+                    *before=textS;
+                    *after=sConRepl(cmd[j],textS);
+                    printf("%s",textS);
+                }*/
+                break;
+            case 'g' :
+                z=numFromS(cmd[j]);
+                for(int gi=0; cmd[gi+1][0]!='\0'; gi++)
+                   max=gi;
+                if(z>0&&z<max)
+                    j=z-2;
+                break;
+            default:
+                fprintf(stderr, "%s", "Bol zadany neznamy prikaz!\n");
+                fclose(prikazy);
+                return 0;
+            }
+        }
+
+        fclose(prikazy);
+        fclose(text);//vymazat
+        return 0;
+    }
+    else
+    {
+        fprintf(stderr, "%s", "Bol zadany nespravny argument, alebo pocet argumentov!\n");
+        return 0;
+    }
+}
+
+
